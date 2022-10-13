@@ -11,13 +11,13 @@ import me.iwareq.anarchy.AnarchyCore;
 import me.iwareq.anarchy.player.task.AutoSavePlayerData;
 import org.sql2o.data.Row;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerManager extends SQLiteDatabase implements Listener {
 
-	private final Map<String, PlayerData> players = new HashMap<>();
+	private final Map<String, PlayerData> players = new ConcurrentHashMap<>();
 
 	public PlayerManager(AnarchyCore main) {
 		super("players");
