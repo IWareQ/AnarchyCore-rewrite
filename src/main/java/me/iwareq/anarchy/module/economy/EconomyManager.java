@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 
 public class EconomyManager {
 
-	public static final String MONEY_FORMAT = "0.0";
+	public static final int MONEY_SCALE = 1;
 
 	private final PlayerManager manager;
 

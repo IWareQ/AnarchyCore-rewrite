@@ -14,6 +14,5 @@ public class MoneyCommand extends BaseCommand {
 	@Override
 	public void execute(PlayerData playerData, Player player, String[] args) {
 		player.sendMessage(AnarchyCore.PREFIX + "Ваш баланс: " + playerData.getMoney() + " $");
-		playerData.addMoney("1.32");
 	}
 }

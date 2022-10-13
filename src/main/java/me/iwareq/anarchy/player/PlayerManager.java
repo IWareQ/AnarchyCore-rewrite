@@ -8,10 +8,9 @@ import cn.nukkit.event.player.PlayerJoinEvent;
 import cn.nukkit.event.player.PlayerQuitEvent;
 import me.hteppl.data.database.SQLiteDatabase;
 import me.iwareq.anarchy.AnarchyCore;
-import me.iwareq.anarchy.module.economy.EconomyManager;
+import me.iwareq.anarchy.player.task.AutoSavePlayerData;
 import org.sql2o.data.Row;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,10 +26,11 @@ public class PlayerManager extends SQLiteDatabase implements Listener {
 				"(\n" +
 				"    ID       INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
 				"    Username VARCHAR(32) NOT NULL COLLATE NOCASE,\n" +
-				"    Money    INT         NOT NULL DEFAULT '" + EconomyManager.MONEY_FORMAT + "'\n" +
+				"    Money    INT         NOT NULL DEFAULT '0.0'\n" +
 				");");
 
 		main.getServer().getPluginManager().registerEvents(this, main);
+		main.getServer().getScheduler().scheduleRepeatingTask(new AutoSavePlayerData(this), 60 * 20);
 	}
 
 	public void loadData(Player player) {
@@ -49,8 +49,7 @@ public class PlayerManager extends SQLiteDatabase implements Listener {
 						.executeUpdate();
 			} else {
 				data.forEach(row -> {
-					// playerData.setMoney(row.getBigDecimal("Money"));
-					playerData.setMoney(new BigDecimal(row.getString("Money")));
+					playerData.setMoney(row.getString("Money"));
 				});
 			}
 
