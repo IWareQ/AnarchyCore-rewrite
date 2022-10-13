@@ -3,9 +3,12 @@ package me.iwareq.anarchy;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.SimpleCommandMap;
 import cn.nukkit.plugin.PluginBase;
+import cn.nukkit.scheduler.ServerScheduler;
 import lombok.Getter;
 import me.iwareq.anarchy.module.economy.EconomyManager;
 import me.iwareq.anarchy.player.PlayerManager;
+import me.iwareq.anarchy.task.AutoRestartTask;
+import me.iwareq.anarchy.task.ClearLagTask;
 
 import java.util.Collections;
 import java.util.Map;
@@ -34,6 +37,8 @@ public class AnarchyCore extends PluginBase {
 		SimpleCommandMap commandMap = this.getServer().getCommandMap();
 		this.economyManager = new EconomyManager(this.playerManager, commandMap);
 
+		this.registerTasks();
+
 		this.unregisterCommands();
 		this.registerCommands(commandMap);
 	}
@@ -46,6 +51,12 @@ public class AnarchyCore extends PluginBase {
 	private void unregisterCommands() {
 		Map<String, Command> commandMap = this.getServer().getCommandMap().getCommands();
 		Stream.of("version", "seed", "help", "?").forEach(commandMap::remove);
+	}
+
+	private void registerTasks() {
+		ServerScheduler scheduler = this.getServer().getScheduler();
+		scheduler.scheduleRepeatingTask(new ClearLagTask(), 20, true);
+		scheduler.scheduleRepeatingTask(new AutoRestartTask(), 20, true);
 	}
 
 	// TODO defaults commands
