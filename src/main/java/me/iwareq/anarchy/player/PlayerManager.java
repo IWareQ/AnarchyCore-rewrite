@@ -1,6 +1,7 @@
 package me.iwareq.anarchy.player;
 
 import cn.nukkit.Player;
+import cn.nukkit.Server;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.EventPriority;
 import cn.nukkit.event.Listener;
@@ -14,6 +15,7 @@ import org.sql2o.data.Row;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 public class PlayerManager extends SQLiteDatabase implements Listener {
 
@@ -26,11 +28,11 @@ public class PlayerManager extends SQLiteDatabase implements Listener {
 				"(\n" +
 				"    ID       INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
 				"    Username VARCHAR(32) NOT NULL COLLATE NOCASE,\n" +
-				"    Money    INT         NOT NULL DEFAULT '0.0'\n" +
+				"    Money    VARCHAR(32) NOT NULL DEFAULT '0.0'\n" +
 				");");
 
 		main.getServer().getPluginManager().registerEvents(this, main);
-		main.getServer().getScheduler().scheduleRepeatingTask(new AutoSavePlayerData(this), 60 * 20);
+		main.getServer().getScheduler().scheduleRepeatingTask(new AutoSavePlayerData(this), 60 * 20, true);
 	}
 
 	public void loadData(Player player) {
@@ -74,7 +76,40 @@ public class PlayerManager extends SQLiteDatabase implements Listener {
 		return this.players.get(player.getName());
 	}
 
+	public void getOfflineData(String name, Consumer<PlayerData> consumer) {
+		Player player = Server.getInstance().getPlayer(name);
+		if (this.isLoaded(player)) {
+			consumer.accept(this.getData(player));
+			return;
+		}
+
+		PlayerData offlineData = new PlayerData(player);
+		List<Row> data = this.getConnection()
+				.createQuery("SELECT Money FROM Players WHERE Username = :username;")
+				.addParameter("username", name)
+				.executeAndFetchTable()
+				.rows();
+
+		if (data.isEmpty()) {
+			consumer.accept(null);
+		} else {
+			data.forEach(row -> offlineData.setMoney(row.getString("Money")));
+
+			consumer.accept(offlineData);
+
+			this.getConnection()
+					.createQuery("UPDATE Players SET Money = :money WHERE Username = :username;")
+					.addParameter("money", offlineData.getMoney())
+					.addParameter("username", name)
+					.executeUpdate();
+		}
+	}
+
 	public boolean isLoaded(Player player) {
+		if (player == null) {
+			return false;
+		}
+
 		return this.players.containsKey(player.getName());
 	}
 

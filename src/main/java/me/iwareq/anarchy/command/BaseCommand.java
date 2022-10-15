@@ -9,31 +9,25 @@ import me.iwareq.anarchy.player.PlayerManager;
 
 public abstract class BaseCommand extends Command {
 
-	public BaseCommand(String name) {
-		super(name);
-	}
-
 	public BaseCommand(String name, String description) {
 		super(name, description);
-	}
 
-	public BaseCommand(String name, String description, String usageMessage) {
-		super(name, description, usageMessage);
-	}
-
-	public BaseCommand(String name, String description, String usageMessage, String[] aliases) {
-		super(name, description, usageMessage, aliases);
+		this.commandParameters.clear();
 	}
 
 	@Override
 	public boolean execute(CommandSender sender, String alias, String[] args) {
-		if (sender instanceof Player) {
+		String permission = this.getPermission();
+		boolean canExecute = sender.hasPermission(permission);
+		if (permission == null) {
+			canExecute = true;
+		}
+
+		if (canExecute && sender.isPlayer()) {
 			Player player = (Player) sender;
 
-			if (player.hasPermission(this.getPermission())) {
-				PlayerManager playerManager = AnarchyCore.getInstance().getPlayerManager();
-				this.execute(playerManager.getData(player), player, args);
-			}
+			PlayerManager playerManager = AnarchyCore.getInstance().getPlayerManager();
+			this.execute(playerManager.getData(player), player, args);
 		}
 
 		return true;
