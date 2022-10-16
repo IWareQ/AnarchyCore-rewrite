@@ -6,6 +6,7 @@ import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.scheduler.ServerScheduler;
 import lombok.Getter;
 import me.iwareq.anarchy.module.economy.EconomyManager;
+import me.iwareq.anarchy.module.permission.PermissionManager;
 import me.iwareq.anarchy.player.PlayerManager;
 import me.iwareq.anarchy.task.AutoRestartTask;
 import me.iwareq.anarchy.task.ClearLagTask;
@@ -24,6 +25,7 @@ public class AnarchyCore extends PluginBase {
 
 	private PlayerManager playerManager;
 	private EconomyManager economyManager;
+	private PermissionManager permissionManager;
 
 	@Override
 	public void onLoad() {
@@ -36,6 +38,8 @@ public class AnarchyCore extends PluginBase {
 
 		SimpleCommandMap commandMap = this.getServer().getCommandMap();
 		this.economyManager = new EconomyManager(this.playerManager, commandMap);
+
+		this.permissionManager = new PermissionManager(this);
 
 		this.registerTasks();
 

@@ -1,0 +1,8 @@
+default:
+  format: "Игрок"
+  permissions:
+
+vip:
+  format: "Вип"
+  permissions:
+    - "nukkit.command.give"

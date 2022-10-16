@@ -3,6 +3,7 @@ package me.iwareq.anarchy.player;
 import cn.nukkit.Player;
 import lombok.Getter;
 import me.iwareq.anarchy.module.economy.EconomyManager;
+import me.iwareq.anarchy.module.permission.Group;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -13,6 +14,7 @@ public class PlayerData {
 	private final Player player;
 
 	private BigDecimal money = new BigDecimal("0.0");
+	private Group group;
 
 	public PlayerData(Player player) {
 		this.player = player;
@@ -42,5 +44,10 @@ public class PlayerData {
 
 	public void setMoney(String value) {
 		this.money = new BigDecimal(value);
+	}
+
+	public void setGroup(Group group) {
+		this.group = group;
+		this.group.init(this.player);
 	}
 }

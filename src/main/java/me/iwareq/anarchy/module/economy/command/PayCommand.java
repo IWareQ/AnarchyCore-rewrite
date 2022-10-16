@@ -58,6 +58,7 @@ public class PayCommand extends BaseCommand {
 			targetData.addMoney(money);
 
 			player.sendMessage("Вы успешно перевели " + money + EconomyManager.MONEY_TYPE + " игроку " + targetName);
+
 			Player targetPlayer = targetData.getPlayer();
 			if (targetPlayer != null) {
 				targetPlayer.sendMessage("Игрок " + player.getName() + " перевел Вам " + money + EconomyManager.MONEY_TYPE);

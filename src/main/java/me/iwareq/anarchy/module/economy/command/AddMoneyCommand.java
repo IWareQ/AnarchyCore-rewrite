@@ -16,7 +16,8 @@ public class AddMoneyCommand extends Command {
 
 	public AddMoneyCommand(PlayerManager manager) {
 		super("addmoney", "Выдать монет");
-		this.setPermission("economy.addmoney");
+		this.setPermission("command.addmoney");
+
 		this.commandParameters.clear();
 		this.commandParameters.put("addmoney", new CommandParameter[]{
 				CommandParameter.newType("money", CommandParamType.FLOAT),
@@ -49,6 +50,7 @@ public class AddMoneyCommand extends Command {
 				targetData.addMoney(money);
 
 				sender.sendMessage("Баланс " + targetName + " пополнен на " + money + EconomyManager.MONEY_TYPE);
+
 				Player targetPlayer = targetData.getPlayer();
 				if (targetPlayer != null) {
 					targetPlayer.sendMessage("Ваш баланс пополнен на " + money + EconomyManager.MONEY_TYPE);

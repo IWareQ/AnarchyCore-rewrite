@@ -9,6 +9,7 @@ import cn.nukkit.event.player.PlayerJoinEvent;
 import cn.nukkit.event.player.PlayerQuitEvent;
 import me.hteppl.data.database.SQLiteDatabase;
 import me.iwareq.anarchy.AnarchyCore;
+import me.iwareq.anarchy.module.permission.PermissionManager;
 import me.iwareq.anarchy.player.task.AutoSavePlayerData;
 import org.sql2o.data.Row;
 
@@ -28,7 +29,8 @@ public class PlayerManager extends SQLiteDatabase implements Listener {
 				"(\n" +
 				"    ID       INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
 				"    Username VARCHAR(32) NOT NULL COLLATE NOCASE,\n" +
-				"    Money    VARCHAR(32) NOT NULL DEFAULT '0.0'\n" +
+				"    Money    VARCHAR(32) NOT NULL DEFAULT '0.0',\n" +
+				"    GroupId  VARCHAR(32) NOT NULL DEFAULT 'default'\n" +
 				");");
 
 		main.getServer().getPluginManager().registerEvents(this, main);
@@ -39,7 +41,7 @@ public class PlayerManager extends SQLiteDatabase implements Listener {
 		if (!this.isLoaded(player)) {
 			PlayerData playerData = new PlayerData(player);
 			List<Row> data = this.getConnection()
-					.createQuery("SELECT Money FROM Players WHERE Username = :username;")
+					.createQuery("SELECT Money, GroupId FROM Players WHERE Username = :username;")
 					.addParameter("username", player.getName())
 					.executeAndFetchTable()
 					.rows();
@@ -52,6 +54,8 @@ public class PlayerManager extends SQLiteDatabase implements Listener {
 			} else {
 				data.forEach(row -> {
 					playerData.setMoney(row.getString("Money"));
+					PermissionManager manager = AnarchyCore.getInstance().getPermissionManager();
+					playerData.setGroup(manager.getGroup(row.getString("GroupId")));
 				});
 			}
 
@@ -63,8 +67,9 @@ public class PlayerManager extends SQLiteDatabase implements Listener {
 		if (this.isLoaded(player)) {
 			PlayerData data = this.getData(player);
 			this.getConnection()
-					.createQuery("UPDATE Players SET Money = :money WHERE Username = :username;")
+					.createQuery("UPDATE Players SET Money = :money, GroupId = :group WHERE Username = :username;")
 					.addParameter("money", data.getMoney())
+					.addParameter("group", data.getGroup().getId())
 					.addParameter("username", data.getPlayer().getName())
 					.executeUpdate();
 
@@ -85,7 +90,7 @@ public class PlayerManager extends SQLiteDatabase implements Listener {
 
 		PlayerData offlineData = new PlayerData(player);
 		List<Row> data = this.getConnection()
-				.createQuery("SELECT Username, Money FROM Players WHERE Username = :username;")
+				.createQuery("SELECT Username, Money, GroupId FROM Players WHERE Username = :username;")
 				.addParameter("username", name)
 				.executeAndFetchTable()
 				.rows();
@@ -94,15 +99,19 @@ public class PlayerManager extends SQLiteDatabase implements Listener {
 			consumer.accept(null, name);
 		} else {
 			for (Row row : data) {
-				offlineData.setMoney(row.getString("Money"));
 				name = row.getString("Username");
+
+				offlineData.setMoney(row.getString("Money"));
+				PermissionManager manager = AnarchyCore.getInstance().getPermissionManager();
+				offlineData.setGroup(manager.getGroup(row.getString("GroupId")));
 			}
 
 			consumer.accept(offlineData, name);
 
 			this.getConnection()
-					.createQuery("UPDATE Players SET Money = :money WHERE Username = :username;")
+					.createQuery("UPDATE Players SET Money = :money, GroupId = :group WHERE Username = :username;")
 					.addParameter("money", offlineData.getMoney())
+					.addParameter("group", offlineData.getGroup().getId())
 					.addParameter("username", name)
 					.executeUpdate();
 		}
