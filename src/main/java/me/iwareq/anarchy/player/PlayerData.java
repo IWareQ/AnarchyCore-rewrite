@@ -18,8 +18,22 @@ public class PlayerData {
 		this.player = player;
 	}
 
+	@Deprecated
 	public void addMoney(String value) {
 		this.money = this.money.add(new BigDecimal(value));
+	}
+
+	public void addMoney(BigDecimal value) {
+		this.money = this.money.add(value);
+	}
+
+	@Deprecated
+	public void reduceMoney(String value) {
+		this.money = this.money.subtract(new BigDecimal(value));
+	}
+
+	public void reduceMoney(BigDecimal value) {
+		this.money = this.money.subtract(value);
 	}
 
 	public BigDecimal getMoney() {

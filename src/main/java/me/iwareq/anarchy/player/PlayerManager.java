@@ -15,7 +15,7 @@ import org.sql2o.data.Row;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 public class PlayerManager extends SQLiteDatabase implements Listener {
 
@@ -76,26 +76,29 @@ public class PlayerManager extends SQLiteDatabase implements Listener {
 		return this.players.get(player.getName());
 	}
 
-	public void getOfflineData(String name, Consumer<PlayerData> consumer) {
-		Player player = Server.getInstance().getPlayer(name);
+	public void getOfflineData(String name, BiConsumer<PlayerData, String> consumer) {
+		Player player = Server.getInstance().getPlayerExact(name);
 		if (this.isLoaded(player)) {
-			consumer.accept(this.getData(player));
+			consumer.accept(this.getData(player), player.getName());
 			return;
 		}
 
 		PlayerData offlineData = new PlayerData(player);
 		List<Row> data = this.getConnection()
-				.createQuery("SELECT Money FROM Players WHERE Username = :username;")
+				.createQuery("SELECT Username, Money FROM Players WHERE Username = :username;")
 				.addParameter("username", name)
 				.executeAndFetchTable()
 				.rows();
 
 		if (data.isEmpty()) {
-			consumer.accept(null);
+			consumer.accept(null, name);
 		} else {
-			data.forEach(row -> offlineData.setMoney(row.getString("Money")));
+			for (Row row : data) {
+				offlineData.setMoney(row.getString("Money"));
+				name = row.getString("Username");
+			}
 
-			consumer.accept(offlineData);
+			consumer.accept(offlineData, name);
 
 			this.getConnection()
 					.createQuery("UPDATE Players SET Money = :money WHERE Username = :username;")

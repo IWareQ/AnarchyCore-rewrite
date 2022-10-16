@@ -30,7 +30,7 @@ public class AddMoneyCommand extends Command {
 	public boolean execute(CommandSender sender, String alias, String[] args) {
 		if (sender.hasPermission(this.getPermission())) {
 			if (args.length < 2) {
-				sender.sendMessage("Использование - /addmoney (кол-во) (игрок)");
+				sender.sendMessage("Использование - /addmoney (кол-во монет) (игрок)");
 				return true;
 			}
 
@@ -40,20 +40,19 @@ public class AddMoneyCommand extends Command {
 				return true;
 			}
 
-			String targetName = args[1];
-			this.manager.getOfflineData(targetName, data -> {
-				if (data == null) {
+			this.manager.getOfflineData(args[1], (targetData, targetName) -> {
+				if (targetData == null) {
 					sender.sendMessage("Игрок " + targetName + " не зарегистрирован!");
 					return;
 				}
 
-				data.addMoney(money.toString());
+				targetData.addMoney(money);
 
 				sender.sendMessage("Баланс " + targetName + " пополнен на " + money + EconomyManager.MONEY_TYPE);
-				Player targetPlayer = data.getPlayer();
+				Player targetPlayer = targetData.getPlayer();
 				if (targetPlayer != null) {
 					targetPlayer.sendMessage("Ваш баланс пополнен на " + money + EconomyManager.MONEY_TYPE);
-					targetPlayer.sendMessage("Ваш баланс: " + data.getMoney() + EconomyManager.MONEY_TYPE);
+					targetPlayer.sendMessage("Ваш баланс: " + targetData.getMoney() + EconomyManager.MONEY_TYPE);
 				}
 			});
 		}

@@ -3,6 +3,7 @@ package me.iwareq.anarchy.module.economy;
 import cn.nukkit.command.SimpleCommandMap;
 import me.iwareq.anarchy.module.economy.command.AddMoneyCommand;
 import me.iwareq.anarchy.module.economy.command.MoneyCommand;
+import me.iwareq.anarchy.module.economy.command.PayCommand;
 import me.iwareq.anarchy.player.PlayerManager;
 
 import java.math.BigDecimal;
@@ -17,6 +18,7 @@ public class EconomyManager {
 	public EconomyManager(PlayerManager manager, SimpleCommandMap commandMap) {
 		commandMap.register("economy", new MoneyCommand());
 		commandMap.register("economy", new AddMoneyCommand(manager));
+		commandMap.register("economy", new PayCommand(manager));
 	}
 
 	public static BigDecimal parse(String value) {
