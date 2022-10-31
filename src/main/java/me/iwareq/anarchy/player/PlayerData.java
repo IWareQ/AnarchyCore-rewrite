@@ -2,8 +2,10 @@ package me.iwareq.anarchy.player;
 
 import cn.nukkit.Player;
 import lombok.Getter;
+import me.iwareq.anarchy.AnarchyCore;
 import me.iwareq.anarchy.module.economy.EconomyManager;
 import me.iwareq.anarchy.module.permission.Group;
+import me.iwareq.anarchy.module.permission.PermissionManager;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -18,6 +20,9 @@ public class PlayerData {
 
 	public PlayerData(Player player) {
 		this.player = player;
+
+		PermissionManager permissionManager = AnarchyCore.getInstance().getPermissionManager();
+		this.setGroup(permissionManager.getGroup("default"));
 	}
 
 	@Deprecated

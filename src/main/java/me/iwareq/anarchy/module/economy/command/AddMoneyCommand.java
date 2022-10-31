@@ -49,12 +49,12 @@ public class AddMoneyCommand extends Command {
 
 				targetData.addMoney(money);
 
-				sender.sendMessage("Баланс " + targetName + " пополнен на " + money + EconomyManager.MONEY_TYPE);
+				sender.sendMessage("Баланс " + targetName + " пополнен на " + money + EconomyManager.MONEY_FORMAT);
 
 				Player targetPlayer = targetData.getPlayer();
 				if (targetPlayer != null) {
-					targetPlayer.sendMessage("Ваш баланс пополнен на " + money + EconomyManager.MONEY_TYPE);
-					targetPlayer.sendMessage("Ваш баланс: " + targetData.getMoney() + EconomyManager.MONEY_TYPE);
+					targetPlayer.sendMessage("Ваш баланс пополнен на " + money + EconomyManager.MONEY_FORMAT);
+					targetPlayer.sendMessage("Ваш баланс: " + targetData.getMoney() + EconomyManager.MONEY_FORMAT);
 				}
 			});
 		}

@@ -8,6 +8,7 @@ import lombok.Getter;
 import me.iwareq.anarchy.module.economy.EconomyManager;
 import me.iwareq.anarchy.module.permission.PermissionManager;
 import me.iwareq.anarchy.player.PlayerManager;
+import me.iwareq.anarchy.scheme.SchemeLoader;
 import me.iwareq.anarchy.task.AutoRestartTask;
 import me.iwareq.anarchy.task.ClearLagTask;
 
@@ -30,6 +31,8 @@ public class AnarchyCore extends PluginBase {
 	@Override
 	public void onLoad() {
 		instance = this;
+
+		SchemeLoader.init();
 	}
 
 	@Override()
@@ -37,7 +40,7 @@ public class AnarchyCore extends PluginBase {
 		this.playerManager = new PlayerManager(this);
 
 		SimpleCommandMap commandMap = this.getServer().getCommandMap();
-		this.economyManager = new EconomyManager(this.playerManager, commandMap);
+		EconomyManager.load(this.playerManager, commandMap);
 
 		this.permissionManager = new PermissionManager(this);
 

@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
+import static me.iwareq.anarchy.scheme.SchemeLoader.scheme;
+
 public class PlayerManager extends SQLiteDatabase implements Listener {
 
 	private final Map<String, PlayerData> players = new ConcurrentHashMap<>();
@@ -25,13 +27,7 @@ public class PlayerManager extends SQLiteDatabase implements Listener {
 	public PlayerManager(AnarchyCore main) {
 		super("players");
 
-		this.executeScheme("CREATE TABLE IF NOT EXISTS Players\n" +
-				"(\n" +
-				"    ID       INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
-				"    Username VARCHAR(32) NOT NULL COLLATE NOCASE,\n" +
-				"    Money    VARCHAR(32) NOT NULL DEFAULT '0.0',\n" +
-				"    GroupId  VARCHAR(32) NOT NULL DEFAULT 'default'\n" +
-				");");
+		this.executeScheme(scheme("players.init"));
 
 		main.getServer().getPluginManager().registerEvents(this, main);
 		main.getServer().getScheduler().scheduleRepeatingTask(new AutoSavePlayerData(this), 60 * 20, true);
@@ -41,14 +37,14 @@ public class PlayerManager extends SQLiteDatabase implements Listener {
 		if (!this.isLoaded(player)) {
 			PlayerData playerData = new PlayerData(player);
 			List<Row> data = this.getConnection()
-					.createQuery("SELECT Money, GroupId FROM Players WHERE Username = :username;")
+					.createQuery(scheme("players.select.all"))
 					.addParameter("username", player.getName())
 					.executeAndFetchTable()
 					.rows();
 
 			if (data.isEmpty()) {
 				this.getConnection()
-						.createQuery("INSERT INTO Players (Username) VALUES (:username);")
+						.createQuery(scheme("players.insert"))
 						.addParameter("username", player.getName())
 						.executeUpdate();
 			} else {
@@ -67,7 +63,7 @@ public class PlayerManager extends SQLiteDatabase implements Listener {
 		if (this.isLoaded(player)) {
 			PlayerData data = this.getData(player);
 			this.getConnection()
-					.createQuery("UPDATE Players SET Money = :money, GroupId = :group WHERE Username = :username;")
+					.createQuery(scheme("players.save.all"))
 					.addParameter("money", data.getMoney())
 					.addParameter("group", data.getGroup().getId())
 					.addParameter("username", data.getPlayer().getName())
@@ -90,7 +86,7 @@ public class PlayerManager extends SQLiteDatabase implements Listener {
 
 		PlayerData offlineData = new PlayerData(player);
 		List<Row> data = this.getConnection()
-				.createQuery("SELECT Username, Money, GroupId FROM Players WHERE Username = :username;")
+				.createQuery(scheme("players.select.all"))
 				.addParameter("username", name)
 				.executeAndFetchTable()
 				.rows();
@@ -109,7 +105,7 @@ public class PlayerManager extends SQLiteDatabase implements Listener {
 			consumer.accept(offlineData, name);
 
 			this.getConnection()
-					.createQuery("UPDATE Players SET Money = :money, GroupId = :group WHERE Username = :username;")
+					.createQuery(scheme("players.save.all"))
 					.addParameter("money", offlineData.getMoney())
 					.addParameter("group", offlineData.getGroup().getId())
 					.addParameter("username", name)

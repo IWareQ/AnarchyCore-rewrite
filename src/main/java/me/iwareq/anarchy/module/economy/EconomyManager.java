@@ -11,11 +11,11 @@ import java.math.RoundingMode;
 
 public class EconomyManager {
 
-	public static final String MONEY_TYPE = "$";
+	public static final String MONEY_FORMAT = "$";
 
 	public static final int MONEY_SCALE = 1;
 
-	public EconomyManager(PlayerManager manager, SimpleCommandMap commandMap) {
+	public static void load(PlayerManager manager, SimpleCommandMap commandMap) {
 		commandMap.register("economy", new MoneyCommand());
 		commandMap.register("economy", new AddMoneyCommand(manager));
 		commandMap.register("economy", new PayCommand(manager));

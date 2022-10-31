@@ -1,3 +1,4 @@
+-- players.init
 CREATE TABLE IF NOT EXISTS Players
 (
     ID       INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -6,21 +7,17 @@ CREATE TABLE IF NOT EXISTS Players
     GroupId  VARCHAR(32) NOT NULL DEFAULT 'default'
 );
 
-DROP TABLE Players;
+-- players.select.all
+SELECT *
+FROM Players
+WHERE Username = :username;
 
+-- players.insert
 INSERT INTO Players (Username)
 VALUES (:username);
 
-INSERT INTO Players (Username)
-VALUES ('IWareQQ');
-
+-- players.save.all
 UPDATE Players
-SET Money = :money
+SET Money   = :money,
+    GroupId = :group
 WHERE Username = :username;
-
-UPDATE Players
-SET Money = '1.0'
-WHERE Username = 'iwareqq';
-
-SELECT *
-FROM Players;

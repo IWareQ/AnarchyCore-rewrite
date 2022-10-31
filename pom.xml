@@ -23,6 +23,7 @@
 				<filtering>true</filtering>
 				<directory>${pom.basedir}/src/main/resources/</directory>
 				<includes>
+					<include>schemes/*</include>
 					<include>plugin.yml</include>
 					<include>groups.yml</include>
 				</includes>

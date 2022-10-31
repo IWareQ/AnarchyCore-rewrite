@@ -39,7 +39,7 @@ public class PayCommand extends BaseCommand {
 
 		if (money.compareTo(playerData.getMoney()) > 0) {
 			player.sendMessage("Вам не хватает монет для перевода!");
-			player.sendMessage("Ваш баланс: " + playerData.getMoney() + EconomyManager.MONEY_TYPE);
+			player.sendMessage("Ваш баланс: " + playerData.getMoney() + EconomyManager.MONEY_FORMAT);
 			return;
 		}
 
@@ -57,11 +57,11 @@ public class PayCommand extends BaseCommand {
 			playerData.reduceMoney(money);
 			targetData.addMoney(money);
 
-			player.sendMessage("Вы успешно перевели " + money + EconomyManager.MONEY_TYPE + " игроку " + targetName);
+			player.sendMessage("Вы успешно перевели " + money + EconomyManager.MONEY_FORMAT + " игроку " + targetName);
 
 			Player targetPlayer = targetData.getPlayer();
 			if (targetPlayer != null) {
-				targetPlayer.sendMessage("Игрок " + player.getName() + " перевел Вам " + money + EconomyManager.MONEY_TYPE);
+				targetPlayer.sendMessage("Игрок " + player.getName() + " перевел Вам " + money + EconomyManager.MONEY_FORMAT);
 			}
 		});
 	}
