@@ -222,6 +222,10 @@ public class AuctionManager extends SQLiteDatabase {
 
 			this.items.remove(id);
 
+			while (page > this.getCountPages()) {
+				page--;
+			}
+
 			this.openAuction(buyer, page);
 		} else {
 			buyer.sendMessage("Недостаточно §6места §fв §6инвентаре§7!");
