@@ -17,6 +17,7 @@ public class SchemeLoader {
 
 	public static void init() {
 		SchemeLoader.load("players.sql");
+		SchemeLoader.load("auction.sql");
 	}
 
 	private static void load(String scheme) {
@@ -24,8 +25,8 @@ public class SchemeLoader {
 		try {
 			scheme = new String(Files.readAllBytes(FOLDER.resolve(scheme)));
 
-			String[] keys = scheme.split("-- ");
-			String[] values = scheme.split("-- +([A-Za-z0-9]+(\\.[A-Za-z0-9]+)+)");
+			String[] keys = scheme.split("-- data.");
+			String[] values = scheme.split("-- data.+([A-Za-z0-9]+(\\.[A-Za-z0-9]+)+)");
 
 			for (int i = 0; i < keys.length; i++) {
 				String key = keys[i];

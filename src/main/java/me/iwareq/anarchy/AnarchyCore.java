@@ -5,10 +5,13 @@ import cn.nukkit.command.SimpleCommandMap;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.scheduler.ServerScheduler;
 import lombok.Getter;
+import me.iwareq.anarchy.command.TestCommand;
+import me.iwareq.anarchy.module.auction.AuctionManager;
 import me.iwareq.anarchy.module.economy.EconomyManager;
 import me.iwareq.anarchy.module.permission.PermissionManager;
 import me.iwareq.anarchy.player.PlayerManager;
 import me.iwareq.anarchy.scheme.SchemeLoader;
+import me.iwareq.anarchy.scoreboard.Scoreboards;
 import me.iwareq.anarchy.task.AutoRestartTask;
 import me.iwareq.anarchy.task.ClearLagTask;
 
@@ -25,8 +28,8 @@ public class AnarchyCore extends PluginBase {
 	private static AnarchyCore instance;
 
 	private PlayerManager playerManager;
-	private EconomyManager economyManager;
 	private PermissionManager permissionManager;
+	private AuctionManager auctionManager;
 
 	@Override
 	public void onLoad() {
@@ -40,9 +43,13 @@ public class AnarchyCore extends PluginBase {
 		this.playerManager = new PlayerManager(this);
 
 		SimpleCommandMap commandMap = this.getServer().getCommandMap();
-		EconomyManager.load(this.playerManager, commandMap);
+		EconomyManager.init(this.playerManager, commandMap);
 
 		this.permissionManager = new PermissionManager(this);
+
+		this.auctionManager = new AuctionManager(commandMap);
+
+		Scoreboards.init(this.playerManager);
 
 		this.registerTasks();
 
@@ -53,6 +60,7 @@ public class AnarchyCore extends PluginBase {
 	@Override
 	public void onDisable() {
 		this.playerManager.saveAll();
+		this.auctionManager.saveItems();
 	}
 
 	private void unregisterCommands() {
@@ -68,6 +76,6 @@ public class AnarchyCore extends PluginBase {
 
 	// TODO defaults commands
 	private void registerCommands(SimpleCommandMap commandMap) {
-		commandMap.registerAll(this.getName(), Collections.emptyList());
+		commandMap.registerAll(this.getName(), Collections.singletonList(new TestCommand()));
 	}
 }

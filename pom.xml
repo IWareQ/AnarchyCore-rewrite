@@ -65,6 +65,22 @@
 		</dependency>
 
 		<dependency>
+			<groupId>me.iwareq.fakeinventories</groupId>
+			<artifactId>FakeInventories</artifactId>
+			<version>1.0.2-SNAPSHOT</version>
+			<scope>system</scope>
+			<systemPath>${pom.basedir}/libs/FakeInventories-1.0.2-SNAPSHOT.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>me.iwareq.scoreboard</groupId>
+			<artifactId>ScoreboardAPI</artifactId>
+			<version>2.1</version>
+			<scope>system</scope>
+			<systemPath>${pom.basedir}/libs/ScoreboardAPI-2.1.jar</systemPath>
+		</dependency>
+
+		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<version>1.18.24</version>

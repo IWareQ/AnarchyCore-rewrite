@@ -11,6 +11,7 @@ import me.hteppl.data.database.SQLiteDatabase;
 import me.iwareq.anarchy.AnarchyCore;
 import me.iwareq.anarchy.module.permission.PermissionManager;
 import me.iwareq.anarchy.player.task.AutoSavePlayerData;
+import me.iwareq.anarchy.scoreboard.Scoreboards;
 import org.sql2o.data.Row;
 
 import java.util.List;
@@ -128,7 +129,10 @@ public class PlayerManager extends SQLiteDatabase implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR,
 	              ignoreCancelled = true)
 	public void onPlayerJoin(PlayerJoinEvent event) {
-		this.loadData(event.getPlayer());
+		Player player = event.getPlayer();
+		this.loadData(player);
+
+		Scoreboards.showScoreboard(player);
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR,

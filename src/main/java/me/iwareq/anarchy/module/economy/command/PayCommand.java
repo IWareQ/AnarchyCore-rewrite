@@ -37,7 +37,7 @@ public class PayCommand extends BaseCommand {
 			return;
 		}
 
-		if (money.compareTo(playerData.getMoney()) > 0) {
+		if (playerData.getMoney().compareTo(money) < 0) {
 			player.sendMessage("Вам не хватает монет для перевода!");
 			player.sendMessage("Ваш баланс: " + playerData.getMoney() + EconomyManager.MONEY_FORMAT);
 			return;

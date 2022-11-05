@@ -1,4 +1,4 @@
--- players.init
+-- data.players.init
 CREATE TABLE IF NOT EXISTS Players
 (
     ID       INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -7,16 +7,16 @@ CREATE TABLE IF NOT EXISTS Players
     GroupId  VARCHAR(32) NOT NULL DEFAULT 'default'
 );
 
--- players.select.all
+-- data.players.select.all
 SELECT *
 FROM Players
 WHERE Username = :username;
 
--- players.insert
+-- data.players.insert
 INSERT INTO Players (Username)
 VALUES (:username);
 
--- players.save.all
+-- data.players.save.all
 UPDATE Players
 SET Money   = :money,
     GroupId = :group
