@@ -250,7 +250,7 @@ public class AuctionManager extends SQLiteDatabase {
 		return (int) Math.ceil((double) data / CHEST_SIZE);
 	}
 
-	public boolean notTrade(Player player) {
+	public boolean cannotTrade(Player player) {
 		int countLots = 0;
 		for (Item item : this.items.values()) {
 			CompoundTag data = item.getNamedTag();
