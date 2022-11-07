@@ -23,6 +23,8 @@ import static me.iwareq.anarchy.scheme.SchemeLoader.scheme;
 
 public class PlayerManager extends SQLiteDatabase implements Listener {
 
+	private static final int AUTO_SAVE_DELAY = 5 * 60 * 20;
+
 	private final Map<String, PlayerData> players = new ConcurrentHashMap<>();
 
 	public PlayerManager(AnarchyCore main) {
@@ -31,21 +33,19 @@ public class PlayerManager extends SQLiteDatabase implements Listener {
 		this.executeScheme(scheme("players.init"));
 
 		main.getServer().getPluginManager().registerEvents(this, main);
-		main.getServer().getScheduler().scheduleRepeatingTask(new AutoSavePlayerData(this), 60 * 20, true);
+		main.getServer().getScheduler().scheduleRepeatingTask(new AutoSavePlayerData(this), AUTO_SAVE_DELAY, true);
 	}
 
 	public void loadData(Player player) {
 		if (!this.isLoaded(player)) {
 			PlayerData playerData = new PlayerData(player);
-			List<Row> data = this.getConnection()
-					.createQuery(scheme("players.select.all"))
+			List<Row> data = this.connection.createQuery(scheme("players.select.all"))
 					.addParameter("username", player.getName())
 					.executeAndFetchTable()
 					.rows();
 
 			if (data.isEmpty()) {
-				this.getConnection()
-						.createQuery(scheme("players.insert"))
+				this.connection.createQuery(scheme("players.insert"))
 						.addParameter("username", player.getName())
 						.executeUpdate();
 			} else {
@@ -63,8 +63,7 @@ public class PlayerManager extends SQLiteDatabase implements Listener {
 	public void saveData(Player player) {
 		if (this.isLoaded(player)) {
 			PlayerData data = this.getData(player);
-			this.getConnection()
-					.createQuery(scheme("players.save.all"))
+			this.connection.createQuery(scheme("players.save"))
 					.addParameter("money", data.getMoney())
 					.addParameter("group", data.getGroup().getId())
 					.addParameter("username", data.getPlayer().getName())
@@ -86,8 +85,7 @@ public class PlayerManager extends SQLiteDatabase implements Listener {
 		}
 
 		PlayerData offlineData = new PlayerData(player);
-		List<Row> data = this.getConnection()
-				.createQuery(scheme("players.select.all"))
+		List<Row> data = this.connection.createQuery(scheme("players.select.all"))
 				.addParameter("username", name)
 				.executeAndFetchTable()
 				.rows();
@@ -105,8 +103,7 @@ public class PlayerManager extends SQLiteDatabase implements Listener {
 
 			consumer.accept(offlineData, name);
 
-			this.getConnection()
-					.createQuery(scheme("players.save.all"))
+			this.connection.createQuery(scheme("players.save.all"))
 					.addParameter("money", offlineData.getMoney())
 					.addParameter("group", offlineData.getGroup().getId())
 					.addParameter("username", name)
