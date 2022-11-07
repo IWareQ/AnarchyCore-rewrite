@@ -18,6 +18,7 @@ public class SchemeLoader {
 	public static void init() {
 		SchemeLoader.load("players.sql");
 		SchemeLoader.load("auction.sql");
+		SchemeLoader.load("region.sql");
 	}
 
 	private static void load(String scheme) {

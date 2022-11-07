@@ -61,15 +61,21 @@ public class PlayerManager extends SQLiteDatabase implements Listener {
 	}
 
 	public void saveData(Player player) {
+		this.saveData(player, true);
+	}
+
+	public void saveData(Player player, boolean remove) {
 		if (this.isLoaded(player)) {
 			PlayerData data = this.getData(player);
-			this.connection.createQuery(scheme("players.save"))
+			this.connection.createQuery(scheme("players.save.all"))
 					.addParameter("money", data.getMoney())
 					.addParameter("group", data.getGroup().getId())
 					.addParameter("username", data.getPlayer().getName())
 					.executeUpdate();
 
-			this.players.remove(player.getName());
+			if (remove) {
+				this.players.remove(player.getName());
+			}
 		}
 	}
 
@@ -120,7 +126,7 @@ public class PlayerManager extends SQLiteDatabase implements Listener {
 	}
 
 	public void saveAll() {
-		this.players.values().forEach(data -> this.saveData(data.getPlayer()));
+		this.players.values().forEach(data -> this.saveData(data.getPlayer(), false));
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR,

@@ -7,13 +7,14 @@ import cn.nukkit.scheduler.ServerScheduler;
 import lombok.Getter;
 import me.iwareq.anarchy.command.TestCommand;
 import me.iwareq.anarchy.module.auction.AuctionManager;
+import me.iwareq.anarchy.module.blockprotection.BlockProtectionManager;
 import me.iwareq.anarchy.module.economy.EconomyManager;
 import me.iwareq.anarchy.module.permission.PermissionManager;
 import me.iwareq.anarchy.player.PlayerManager;
 import me.iwareq.anarchy.scheme.SchemeLoader;
 import me.iwareq.anarchy.scoreboard.Scoreboards;
-import me.iwareq.anarchy.task.AutoRestartTask;
 import me.iwareq.anarchy.task.ClearLagTask;
+import me.iwareq.anarchy.task.RestartTask;
 
 import java.util.Collections;
 import java.util.Map;
@@ -30,6 +31,7 @@ public class AnarchyCore extends PluginBase {
 	private PlayerManager playerManager;
 	private PermissionManager permissionManager;
 	private AuctionManager auctionManager;
+	private BlockProtectionManager blockProtectionManager;
 
 	@Override
 	public void onLoad() {
@@ -47,7 +49,9 @@ public class AnarchyCore extends PluginBase {
 
 		this.permissionManager = new PermissionManager(this);
 
-		this.auctionManager = new AuctionManager(commandMap);
+		this.auctionManager = new AuctionManager(this, commandMap);
+
+		this.blockProtectionManager = new BlockProtectionManager(this);
 
 		Scoreboards.init(this.playerManager);
 
@@ -61,6 +65,7 @@ public class AnarchyCore extends PluginBase {
 	public void onDisable() {
 		this.playerManager.saveAll();
 		this.auctionManager.saveItems();
+		this.blockProtectionManager.saveAll();
 	}
 
 	private void unregisterCommands() {
@@ -71,7 +76,7 @@ public class AnarchyCore extends PluginBase {
 	private void registerTasks() {
 		ServerScheduler scheduler = this.getServer().getScheduler();
 		scheduler.scheduleRepeatingTask(new ClearLagTask(), 20, true);
-		scheduler.scheduleRepeatingTask(new AutoRestartTask(), 20, true);
+		scheduler.scheduleRepeatingTask(new RestartTask(), 20, true);
 	}
 
 	// TODO defaults commands

@@ -1,0 +1,9 @@
+"56":
+  name: "Алмазный Регион"
+  radius: 4
+  image: "textures/ui/diamond_ore"
+
+"15":
+  name: "Железный Регион"
+  radius: 2
+  image: "textures/ui/iron_block"

@@ -16,7 +16,6 @@ import me.iwareq.anarchy.player.PlayerData;
 import me.iwareq.anarchy.player.PlayerManager;
 import me.iwareq.anarchy.util.NbtConverter;
 import me.iwareq.fakeinventories.CustomInventory;
-import org.sql2o.Connection;
 import org.sql2o.data.Row;
 
 import java.math.BigDecimal;
@@ -106,27 +105,24 @@ public class AuctionManager extends SQLiteDatabase {
 	}
 
 	public void saveItems() {
-		try (Connection transaction = this.getSql2o().beginTransaction()) {
-			transaction.createQuery(scheme("items.delete.all")).executeUpdate();
+		this.connection.createQuery(scheme("items.delete.all")).executeUpdate();
 
-			this.items.forEach((id, item) -> {
-				CompoundTag data = item.getNamedTag();
+		this.items.forEach((id, item) -> {
+			CompoundTag data = item.getNamedTag();
 
-				String sellerName = data.getString("SellerName");
-				String price = data.getString("Price");
+			String sellerName = data.getString("SellerName");
+			String price = data.getString("Price");
 
-				transaction.createQuery(scheme("items.insert"))
-						.addParameter("sellerName", sellerName)
-						.addParameter("price", price)
-						.addParameter("itemId", item.getId())
-						.addParameter("itemDamage", item.getDamage())
-						.addParameter("itemCount", item.getCount())
-						.addParameter("nbtHex", NbtConverter.toHex(data))
-						.executeUpdate();
-			});
+			this.connection.createQuery(scheme("items.insert"))
+					.addParameter("sellerName", sellerName)
+					.addParameter("price", price)
+					.addParameter("itemId", item.getId())
+					.addParameter("itemDamage", item.getDamage())
+					.addParameter("itemCount", item.getCount())
+					.addParameter("nbtHex", NbtConverter.toHex(data))
+					.executeUpdate();
+		});
 
-			transaction.commit();
-		}
 	}
 
 	private List<Item> getItemsByPage(int page) {
