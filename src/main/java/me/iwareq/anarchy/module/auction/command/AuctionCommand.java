@@ -36,7 +36,7 @@ public class AuctionCommand extends Command {
 				return true;
 			}
 
-			if (this.manager.notTrade(player)) {
+			if (this.manager.cannotTrade(player)) {
 				player.sendMessage("Вы уже разместили или храните максимальное колличество лотов §7(§6" + AuctionManager.MAX_LOTS + "§7)");
 				return false;
 			}
