@@ -10,6 +10,7 @@ import me.hteppl.data.database.SQLiteDatabase;
 import me.iwareq.anarchy.AnarchyCore;
 import me.iwareq.anarchy.module.auction.chest.AuctionChest;
 import me.iwareq.anarchy.module.auction.command.AuctionCommand;
+import me.iwareq.anarchy.module.auction.task.SaveAuctionItems;
 import me.iwareq.anarchy.module.economy.EconomyManager;
 import me.iwareq.anarchy.player.PlayerData;
 import me.iwareq.anarchy.player.PlayerManager;
@@ -33,6 +34,9 @@ public class AuctionManager extends SQLiteDatabase {
 	public static final BigDecimal MIN_PRICE = new BigDecimal("0.1");
 
 	public static final int MAX_LOTS = 5;
+
+	private static final int AUTO_SAVE_DELAY = 10 * 60 * 20; // 10 min
+
 	private static final int CHEST_SIZE = 36;
 
 	private static final AtomicInteger ID = new AtomicInteger();
@@ -40,7 +44,7 @@ public class AuctionManager extends SQLiteDatabase {
 	private final Map<Player, AuctionChest> auctions = new ConcurrentHashMap<>();
 	private final Map<Integer, Item> items = new ConcurrentHashMap<>();
 
-	public AuctionManager(SimpleCommandMap commandMap) {
+	public AuctionManager(AnarchyCore main, SimpleCommandMap commandMap) {
 		super("auction");
 
 		this.executeScheme(scheme("items.init"));
@@ -52,6 +56,8 @@ public class AuctionManager extends SQLiteDatabase {
 		ID.set(lastId);
 
 		commandMap.register("auction", new AuctionCommand(this));
+
+		main.getServer().getScheduler().scheduleRepeatingTask(new SaveAuctionItems(this), AUTO_SAVE_DELAY, true);
 	}
 
 	private void loadItems() {

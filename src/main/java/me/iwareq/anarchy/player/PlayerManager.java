@@ -10,7 +10,7 @@ import cn.nukkit.event.player.PlayerQuitEvent;
 import me.hteppl.data.database.SQLiteDatabase;
 import me.iwareq.anarchy.AnarchyCore;
 import me.iwareq.anarchy.module.permission.PermissionManager;
-import me.iwareq.anarchy.player.task.AutoSavePlayerData;
+import me.iwareq.anarchy.player.task.SavePlayersData;
 import me.iwareq.anarchy.scoreboard.Scoreboards;
 import org.sql2o.data.Row;
 
@@ -23,7 +23,7 @@ import static me.iwareq.anarchy.scheme.SchemeLoader.scheme;
 
 public class PlayerManager extends SQLiteDatabase implements Listener {
 
-	private static final int AUTO_SAVE_DELAY = 5 * 60 * 20;
+	private static final int AUTO_SAVE_DELAY = 10 * 60 * 20; // 10 min
 
 	private final Map<String, PlayerData> players = new ConcurrentHashMap<>();
 
@@ -33,7 +33,7 @@ public class PlayerManager extends SQLiteDatabase implements Listener {
 		this.executeScheme(scheme("players.init"));
 
 		main.getServer().getPluginManager().registerEvents(this, main);
-		main.getServer().getScheduler().scheduleRepeatingTask(new AutoSavePlayerData(this), AUTO_SAVE_DELAY, true);
+		main.getServer().getScheduler().scheduleRepeatingTask(new SavePlayersData(this), AUTO_SAVE_DELAY, true);
 	}
 
 	public void loadData(Player player) {

@@ -4,7 +4,7 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.scheduler.Task;
 
-public class AutoRestartTask extends Task {
+public class RestartTask extends Task {
 
 	private static final int RESTART_DELAY = 3 * 60 * 60;
 
