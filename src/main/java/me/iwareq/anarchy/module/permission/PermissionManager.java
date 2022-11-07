@@ -31,7 +31,7 @@ public class PermissionManager {
 			groups.put(id, new Group(id, format, permissions));
 		});
 
-		main.getServer().getCommandMap().register(main.getName(), new SetGroupCommand(this));
+		main.getServer().getCommandMap().register("permission", new SetGroupCommand(this));
 		main.getServer().getPluginManager().registerEvents(new ChatListener(), main);
 	}
 
