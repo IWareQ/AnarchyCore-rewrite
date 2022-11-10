@@ -60,8 +60,9 @@ public class AuctionCommand extends Command {
 			player.sendMessage("Предмет на продажу успешно выставлен за " + price + EconomyManager.MONEY_FORMAT);
 			player.getServer().broadcastMessage("Игрок §6" + player.getName() + " выставил предмет на продажу!");
 
-			this.manager.addItem(player, price, item);
 			player.getInventory().setItemInHand(Item.get(Item.AIR));
+
+			this.manager.addItem(player, price, item);
 		}
 
 		return false;

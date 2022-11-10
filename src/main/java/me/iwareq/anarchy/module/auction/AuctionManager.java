@@ -16,6 +16,7 @@ import me.iwareq.anarchy.player.PlayerData;
 import me.iwareq.anarchy.player.PlayerManager;
 import me.iwareq.anarchy.util.NbtConverter;
 import me.iwareq.fakeinventories.CustomInventory;
+import org.sql2o.Connection;
 import org.sql2o.data.Row;
 
 import java.math.BigDecimal;
@@ -104,25 +105,37 @@ public class AuctionManager extends SQLiteDatabase {
 		}
 	}
 
-	public void saveItems() {
-		this.connection.createQuery(scheme("items.delete.all")).executeUpdate();
+	public synchronized void saveItems() {
+		List<Integer> ids = this.connection.createQuery(scheme("items.select.all.ids"))
+				.executeScalarList(Integer.class);
 
-		this.items.forEach((id, item) -> {
-			CompoundTag data = item.getNamedTag();
+		try (Connection transaction = this.getSql2o().beginTransaction()) {
+			this.items.forEach((id, item) -> {
+				CompoundTag data = item.getNamedTag();
 
-			String sellerName = data.getString("SellerName");
-			String price = data.getString("Price");
+				ids.remove(id);
 
-			this.connection.createQuery(scheme("items.insert"))
-					.addParameter("sellerName", sellerName)
-					.addParameter("price", price)
-					.addParameter("itemId", item.getId())
-					.addParameter("itemDamage", item.getDamage())
-					.addParameter("itemCount", item.getCount())
-					.addParameter("nbtHex", NbtConverter.toHex(data))
-					.executeUpdate();
-		});
+				String sellerName = data.getString("SellerName");
+				String price = data.getString("Price");
 
+				transaction.createQuery(scheme("items.insert"))
+						.addParameter("id", id)
+						.addParameter("sellerName", sellerName)
+						.addParameter("price", price)
+						.addParameter("itemId", item.getId())
+						.addParameter("itemDamage", item.getDamage())
+						.addParameter("itemCount", item.getCount())
+						.addParameter("nbtHex", NbtConverter.toHex(data))
+						.executeUpdate();
+			});
+
+			ids.forEach(id ->
+					transaction.createQuery(scheme("items.delete"))
+							.addParameter("id", id)
+							.executeUpdate());
+
+			transaction.commit();
+		}
 	}
 
 	private List<Item> getItemsByPage(int page) {
@@ -239,10 +252,11 @@ public class AuctionManager extends SQLiteDatabase {
 
 	private Item setItemRole(Item item, String sellerName, BigDecimal price) {
 		return item.setLore(
-				"\n§rПродавец§7: §6" + sellerName,
+				"",
+				"§rПродавец§7: §6" + sellerName,
 				"§rСтоимость§7: §6" + price + EconomyManager.MONEY_FORMAT,
 				"",
-				"§l§6• §rНажмите§7, §fчтобы купить предмет§7!"
+				"§r§6• §rНажмите§7, §fчтобы купить предмет§7!"
 		);
 	}
 

@@ -11,16 +11,22 @@ CREATE TABLE IF NOT EXISTS Items
 );
 
 -- data.items.insert
-INSERT INTO Items(SellerName, Price, ItemID, ItemDamage, ItemCount, NbtHex)
-VALUES (:sellerName, :price, :itemId, :itemDamage, :itemCount, :nbtHex);
+INSERT INTO Items(ID, SellerName, Price, ItemID, ItemDamage, ItemCount, NbtHex)
+VALUES (:id, :sellerName, :price, :itemId, :itemDamage, :itemCount, :nbtHex)
+ON CONFLICT (ID) DO NOTHING;
 
 -- noinspection SqlWithoutWhere
--- data.items.delete.all
+-- data.items.delete
 DELETE
-FROM Items;
+FROM Items
+WHERE ID = :id;
 
 -- data.items.select.all
 SELECT *
+FROM Items;
+
+-- data.items.select.all.ids
+SELECT ID
 FROM Items;
 
 -- data.items.select.lastId

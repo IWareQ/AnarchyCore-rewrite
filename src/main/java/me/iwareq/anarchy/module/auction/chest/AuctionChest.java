@@ -24,7 +24,7 @@ public class AuctionChest extends CustomInventory {
 
 		Item storageItem = Item.get(Item.MINECART_WITH_CHEST);
 		storageItem.setCustomName("§r§6Хранилище");
-		storageItem.setLore("\n§r§l§6• §rНажмите§7, §fчтобы перейти§7!");
+		storageItem.setLore("", "§r§6• §rНажмите§7, §fчтобы перейти§7!");
 
 		this.setItem(48, storageItem, (item, inventory, event) -> {
 			event.setCancelled();
@@ -33,7 +33,8 @@ public class AuctionChest extends CustomInventory {
 		Item aboutItem = Item.get(Item.SIGN);
 		aboutItem.setCustomName("§r§6Справка");
 		aboutItem.setLore(
-				"\n§rЭто торговая площадка§7, §fкоторая создана",
+				"",
+				"§rЭто торговая площадка§7, §fкоторая создана",
 				"§rдля покупки и продажи предметов§7.",
 				"",
 				"§r§fТорговая площадка также является",
@@ -54,7 +55,7 @@ public class AuctionChest extends CustomInventory {
 		if (countPages != 1) {
 			Item backPageItem = Item.get(Item.PAPER);
 			backPageItem.setCustomName("§r§6Листнуть назад");
-			backPageItem.setLore("\n§r§l§6• §rНажмите§7, §fчтобы перейти§7!");
+			backPageItem.setLore("", "§r§6• §rНажмите§7, §fчтобы перейти§7!");
 
 			this.setItem(45, backPageItem, (item, inventory, event) -> {
 				Player player = event.getTransaction().getSource();
@@ -70,7 +71,7 @@ public class AuctionChest extends CustomInventory {
 
 			Item nextPageItem = Item.get(Item.PAPER);
 			nextPageItem.setCustomName("§r§6Листнуть вперед");
-			nextPageItem.setLore("\n§r§l§6• §rНажмите§7, §fчтобы перейти§7!");
+			nextPageItem.setLore("", "§r§6• §rНажмите§7, §fчтобы перейти§7!");
 
 			this.setItem(53, nextPageItem, (item, inventory, event) -> {
 				Player player = event.getTransaction().getSource();
