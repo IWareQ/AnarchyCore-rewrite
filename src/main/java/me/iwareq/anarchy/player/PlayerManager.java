@@ -125,7 +125,7 @@ public class PlayerManager extends SQLiteDatabase implements Listener {
 		return this.players.containsKey(player.getName());
 	}
 
-	public void saveAll() {
+	public synchronized void saveAll() {
 		this.players.values().forEach(data -> this.saveData(data.getPlayer(), false));
 	}
 
