@@ -14,6 +14,7 @@ import me.iwareq.anarchy.module.blockprotection.listener.ControlRegionListener;
 import me.iwareq.anarchy.module.blockprotection.listener.RegionLimitListener;
 import me.iwareq.anarchy.module.blockprotection.task.SaveRegionsData;
 import me.iwareq.anarchy.module.blockprotection.util.Area3D;
+import org.sql2o.Connection;
 import org.sql2o.data.Row;
 
 import java.io.File;
@@ -22,6 +23,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringJoiner;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static me.iwareq.anarchy.scheme.SchemeLoader.scheme;
 
@@ -30,7 +34,9 @@ public class BlockProtectionManager extends SQLiteDatabase {
 
 	private static final int AUTO_SAVE_DELAY = 10 * 60 * 20; // 10 min
 
-	private final Set<RegionData> regions = new HashSet<>();
+	private static final AtomicInteger ID = new AtomicInteger(1);
+
+	private final Map<Integer, RegionData> regions = new ConcurrentHashMap<>();
 
 	private final Map<Integer, BlockData> blocks = new HashMap<>();
 
@@ -38,7 +44,10 @@ public class BlockProtectionManager extends SQLiteDatabase {
 		super("region");
 
 		this.executeScheme(scheme("regions.init"));
-		this.executeScheme(scheme("members.init"));
+
+		int lastId = this.getConnection().createQuery(scheme("regions.select.lastId")).executeScalar(Integer.class);
+
+		ID.set(lastId);
 
 		main.saveResource("regions.yml");
 
@@ -86,56 +95,63 @@ public class BlockProtectionManager extends SQLiteDatabase {
 
 			Area3D area3D = new Area3D(minX, minY, minZ, maxX, maxY, maxZ);
 
-			RegionData regionData = new RegionData(ownerName, regionBlockPosition, area3D);
-
 			int regionId = data.getInteger("ID");
 
-			List<String> members = this.connection.createQuery(scheme("members.select"))
-					.addParameter("regionId", regionId)
-					.executeScalarList(String.class);
+			RegionData regionData = new RegionData(regionId, ownerName, regionBlockPosition, area3D);
 
-			regionData.addMembers(members);
+			String[] members = data.getString("Members").split(";");
 
-			this.regions.add(regionData);
+			for (String member : members) {
+				regionData.addMember(member);
+			}
+
+			this.regions.put(regionId, regionData);
 		}
-
 	}
 
-	public void saveAll() {
-		this.connection.createQuery(scheme("regions.delete.all")).executeUpdate();
+	public synchronized void saveAll() {
+		List<Integer> ids = this.connection.createQuery(scheme("regions.select.all.ids"))
+				.executeScalarList(Integer.class);
 
-		this.connection.createQuery(scheme("members.delete.all")).executeUpdate();
+		try (Connection transaction = this.getSql2o().beginTransaction()) {
+			this.regions.forEach((id, regionData) -> {
+				ids.remove(id);
 
-		this.regions.forEach(regionData -> {
-			Position regionBlock = regionData.getRegionBlock();
+				Position regionBlock = regionData.getRegionBlock();
 
-			Area3D area3D = regionData.getArea3D();
-			this.connection.createQuery(scheme("regions.insert"))
-					.addParameter("ownerName", regionData.getOwnerName())
+				Area3D area3D = regionData.getArea3D();
+				Set<String> members = regionData.getMembers();
 
-					.addParameter("mainX", regionBlock.getFloorX())
-					.addParameter("mainY", regionBlock.getFloorY())
-					.addParameter("mainZ", regionBlock.getFloorZ())
+				StringJoiner joiner = new StringJoiner(";");
+				members.forEach(joiner::add);
 
-					.addParameter("minX", area3D.getMinX())
-					.addParameter("minY", area3D.getMinY())
-					.addParameter("minZ", area3D.getMinZ())
+				transaction.createQuery(scheme("regions.insert"))
+						.addParameter("id", id)
+						.addParameter("ownerName", regionData.getOwnerName())
 
-					.addParameter("maxX", area3D.getMaxX())
-					.addParameter("maxY", area3D.getMaxY())
-					.addParameter("maxZ", area3D.getMaxZ())
-					.executeUpdate();
+						.addParameter("members", joiner)
 
-			int lastId = this.connection.createQuery(scheme("regions.select.lastId"))
-					.executeScalar(Integer.class);
+						.addParameter("mainX", regionBlock.getFloorX())
+						.addParameter("mainY", regionBlock.getFloorY())
+						.addParameter("mainZ", regionBlock.getFloorZ())
 
-			for (String member : regionData.getMembers()) {
-				this.connection.createQuery(scheme("members.insert"))
-						.addParameter("regionId", lastId)
-						.addParameter("name", member)
+						.addParameter("minX", area3D.getMinX())
+						.addParameter("minY", area3D.getMinY())
+						.addParameter("minZ", area3D.getMinZ())
+
+						.addParameter("maxX", area3D.getMaxX())
+						.addParameter("maxY", area3D.getMaxY())
+						.addParameter("maxZ", area3D.getMaxZ())
 						.executeUpdate();
-			}
-		});
+			});
+
+			ids.forEach(id ->
+					transaction.createQuery(scheme("regions.delete"))
+							.addParameter("id", id)
+							.executeUpdate());
+
+			transaction.commit();
+		}
 	}
 
 	public void createRegion(Player player, Block block) {
@@ -150,13 +166,14 @@ public class BlockProtectionManager extends SQLiteDatabase {
 			return;
 		}
 
-		regions.add(new RegionData(player.getName(), main, area3D));
+		RegionData regionData = new RegionData(ID.incrementAndGet(), player.getName(), main, area3D);
+		regions.put(regionData.getId(), regionData);
 
 		player.sendMessage("Вы успешно создали новый " + blockData.getName() + "§7!");
 	}
 
 	private boolean cannotCreateRegion(Area3D area3D) {
-		for (RegionData regionData : this.regions) {
+		for (RegionData regionData : this.regions.values()) {
 			if (regionData.getArea3D().isCollided(area3D)) {
 				return true;
 			}
@@ -166,7 +183,7 @@ public class BlockProtectionManager extends SQLiteDatabase {
 	}
 
 	public RegionData getRegionData(Position main) {
-		for (RegionData regionData : this.regions) {
+		for (RegionData regionData : this.regions.values()) {
 			Area3D area3D = regionData.getArea3D();
 			if (area3D.isCollided(main)) {
 				return regionData;
@@ -178,7 +195,7 @@ public class BlockProtectionManager extends SQLiteDatabase {
 
 	public Set<RegionData> getRegionsData(String playerName) {
 		Set<RegionData> result = new HashSet<>();
-		for (RegionData regionData : this.regions) {
+		for (RegionData regionData : this.regions.values()) {
 			if (regionData.isOwner(playerName)) {
 				result.add(regionData);
 			}
@@ -188,7 +205,7 @@ public class BlockProtectionManager extends SQLiteDatabase {
 	}
 
 	public void deleteRegion(RegionData regionData) {
-		this.regions.remove(regionData);
+		this.regions.remove(regionData.getId());
 	}
 
 	public boolean cannotInteractHere(Player player, Position position) {

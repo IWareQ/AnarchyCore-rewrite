@@ -4,6 +4,8 @@ CREATE TABLE IF NOT EXISTS Regions
     ID        INTEGER PRIMARY KEY AUTOINCREMENT,
     OwnerName VARCHAR(32) NOT NULL COLLATE NOCASE,
 
+    Members   TEXT DEFAULT '',
+
     MainX     INT         NOT NULL,
     MainY     INT         NOT NULL,
     MainZ     INT         NOT NULL,
@@ -17,40 +19,23 @@ CREATE TABLE IF NOT EXISTS Regions
     MaxZ      INT         NOT NULL
 );
 
--- data.members.init
-CREATE TABLE IF NOT EXISTS Members
-(
-    RegionID INT         NOT NULL,
-    Name     VARCHAR(32) NOT NULL COLLATE NOCASE
-);
-
 -- data.regions.insert
-INSERT INTO Regions(OwnerName, MainX, MainY, MainZ, MinX, MinY, MinZ, MaxX, MaxY, MaxZ)
-VALUES (:ownerName, :mainX, :mainY, :mainZ, :minX, :minY, :minZ, :maxX, :maxY, :maxZ);
+INSERT INTO Regions(ID, OwnerName, Members, MainX, MainY, MainZ, MinX, MinY, MinZ, MaxX, MaxY, MaxZ)
+VALUES (:id, :ownerName, :members, :mainX, :mainY, :mainZ, :minX, :minY, :minZ, :maxX, :maxY, :maxZ)
+ON CONFLICT (ID) DO UPDATE SET Members = :members;
 
--- data.members.insert
-INSERT INTO Members(RegionID, Name)
-VALUES (:regionId, :name);
-
--- noinspection SqlWithoutWhere
--- data.regions.delete.all
+-- data.regions.delete
 DELETE
-FROM Regions;
-
--- noinspection SqlWithoutWhere
--- data.members.delete.all
-DELETE
-FROM Members;
+FROM Regions
+WHERE ID = :id;
 
 -- data.regions.select.all
 SELECT *
 FROM Regions;
 
--- data.members.select
-SELECT Name
-FROM Members
-WHERE RegionID = :regionId;
+-- data.regions.select.all.ids
+SELECT ID
+FROM Regions;
 
 -- data.regions.select.lastId
-SELECT last_insert_rowid()
-FROM Regions;
+SELECT last_insert_rowid();

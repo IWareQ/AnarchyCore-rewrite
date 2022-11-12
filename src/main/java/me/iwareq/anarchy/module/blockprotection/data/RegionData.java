@@ -13,6 +13,8 @@ import java.util.Set;
 @AllArgsConstructor
 public class RegionData {
 
+	private final int id;
+
 	private final String ownerName;
 
 	private final Set<String> members = new HashSet<>();
@@ -22,7 +24,9 @@ public class RegionData {
 	private final Area3D area3D;
 
 	public void addMember(String playerName) {
-		this.members.add(playerName);
+		if (!playerName.isEmpty()) {
+			this.members.add(playerName);
+		}
 	}
 
 	public void removeMember(String playerName) {
