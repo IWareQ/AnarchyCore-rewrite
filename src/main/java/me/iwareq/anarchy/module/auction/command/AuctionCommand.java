@@ -51,18 +51,22 @@ public class AuctionCommand extends Command {
 				return false;
 			}
 
-			Item item = player.getInventory().getItemInHand();
-			if (item.getId() == Item.AIR) {
+			for (int i = 0; i < 38; i++) {
+				Item item = player.getInventory().getItemInHand().clone();
+				this.manager.addItem(player, price, item);
+			}
+
+			/*if (item.getId() == Item.AIR) {
 				player.sendMessage("Чтобы выставить предмет на продажу, возьмите его в руку!");
 				return true;
-			}
+			}*/
 
 			player.sendMessage("Предмет на продажу успешно выставлен за " + price + EconomyManager.MONEY_FORMAT);
 			player.getServer().broadcastMessage("Игрок §6" + player.getName() + " выставил предмет на продажу!");
 
 			player.getInventory().setItemInHand(Item.get(Item.AIR));
 
-			this.manager.addItem(player, price, item);
+			// this.manager.addItem(player, price, item);
 		}
 
 		return false;

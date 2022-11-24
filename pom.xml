@@ -23,7 +23,7 @@
 				<filtering>true</filtering>
 				<directory>${pom.basedir}/src/main/resources/</directory>
 				<includes>
-					<include>schemes/*</include>
+					<include>schemes/*.sql</include>
 					<include>*.yml</include>
 				</includes>
 			</resource>
@@ -66,9 +66,9 @@
 		<dependency>
 			<groupId>me.iwareq.fakeinventories</groupId>
 			<artifactId>FakeInventories</artifactId>
-			<version>1.0.2-SNAPSHOT</version>
+			<version>1.1.1</version>
 			<scope>system</scope>
-			<systemPath>${pom.basedir}/libs/FakeInventories-1.0.2-SNAPSHOT.jar</systemPath>
+			<systemPath>${pom.basedir}/libs/FakeInventories-1.1.1.jar</systemPath>
 		</dependency>
 
 		<dependency>

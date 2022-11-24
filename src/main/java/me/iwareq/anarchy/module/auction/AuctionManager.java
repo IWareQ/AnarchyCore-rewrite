@@ -2,20 +2,16 @@ package me.iwareq.anarchy.module.auction;
 
 import cn.nukkit.Player;
 import cn.nukkit.command.SimpleCommandMap;
-import cn.nukkit.inventory.PlayerInventory;
 import cn.nukkit.item.Item;
-import cn.nukkit.level.Sound;
 import cn.nukkit.nbt.tag.CompoundTag;
 import me.hteppl.data.database.SQLiteDatabase;
 import me.iwareq.anarchy.AnarchyCore;
 import me.iwareq.anarchy.module.auction.chest.AuctionChest;
+import me.iwareq.anarchy.module.auction.chest.ItemBuyHandler;
 import me.iwareq.anarchy.module.auction.command.AuctionCommand;
 import me.iwareq.anarchy.module.auction.task.SaveAuctionItems;
 import me.iwareq.anarchy.module.economy.EconomyManager;
-import me.iwareq.anarchy.player.PlayerData;
-import me.iwareq.anarchy.player.PlayerManager;
 import me.iwareq.anarchy.util.NbtConverter;
-import me.iwareq.fakeinventories.CustomInventory;
 import org.sql2o.Connection;
 import org.sql2o.data.Row;
 
@@ -51,7 +47,9 @@ public class AuctionManager extends SQLiteDatabase {
 
 		this.loadItems();
 
-		int lastId = this.getConnection().createQuery(scheme("items.select.lastId")).executeScalar(Integer.class);
+		int lastId = this.getConnection()
+				.createQuery(scheme("items.select.lastId"))
+				.executeScalar(Integer.class);
 
 		ID.set(lastId);
 
@@ -154,7 +152,7 @@ public class AuctionManager extends SQLiteDatabase {
 		}
 
 		List<Item> itemsByPage = this.getItemsByPage(page);
-		auctionChest.addItem(itemsByPage.toArray(new Item[0]));
+		auctionChest.addItem(new ItemBuyHandler(auctionChest, this, page), itemsByPage.toArray(new Item[0]));
 
 		AuctionChest old = this.auctions.get(player);
 		if (old == null) {
@@ -179,75 +177,19 @@ public class AuctionManager extends SQLiteDatabase {
 			data = new CompoundTag();
 		}
 
-		data.putInt("ID", id);
-		data.putString("SellerName", seller.getName());
-		data.putString("Price", price.toString());
+		CompoundTag auctionData = new CompoundTag();
+
+		auctionData.putInt("ID", id);
+		auctionData.putString("SellerName", seller.getName());
+		auctionData.putString("Price", price.toString());
+
+		data.putCompound("AuctionData", auctionData);
 
 		item.setNamedTag(data);
 
 		item = this.setItemRole(item, seller.getName(), price);
 
 		this.items.put(id, item);
-	}
-
-	public void buyItem(Player buyer, Item item, int page, CustomInventory inventory) {
-		CompoundTag data = item.getNamedTag();
-		BigDecimal price = EconomyManager.parse(data.getString("Price"));
-
-		PlayerManager playerManager = AnarchyCore.getInstance().getPlayerManager();
-		PlayerData playerData = playerManager.getData(buyer);
-		if (playerData.getMoney().compareTo(price) < 0) {
-			buyer.sendMessage("Недостаточно §6монет §fдля совершения покупки§7!");
-			buyer.getLevel().addSound(buyer, Sound.NOTE_BASS, 1, 1, buyer);
-			return;
-		}
-
-		PlayerInventory buyerInventory = buyer.getInventory();
-		if (buyerInventory.canAddItem(item)) {
-			inventory.removeItem(item);
-
-			int id = data.getInt("ID");
-
-			String sellerName = data.getString("SellerName");
-			if (sellerName.equals(buyer.getName())) {
-				data.remove("ID");
-				data.remove("display");
-
-				buyerInventory.addItem(item.setNamedTag(data));
-
-				buyer.sendMessage("Предмет был §6снят с продажи §fи отправлен Вам в Инвентарь");
-				buyer.getLevel().addSound(buyer, Sound.RANDOM_LEVELUP, 1, 1, buyer);
-			} else {
-				data.remove("ID");
-				data.remove("display");
-
-				buyerInventory.addItem(item.setNamedTag(data));
-
-				playerManager.getOfflineData(sellerName, (targetData, targetName) -> {
-					playerData.reduceMoney(price);
-					targetData.addMoney(price);
-
-					Player targetPlayer = targetData.getPlayer();
-					if (targetPlayer != null) {
-						targetPlayer.sendMessage("Игрок §6" + buyer.getName() + " §fкупил Ваш товар за §6" + price + EconomyManager.MONEY_FORMAT);
-					}
-				});
-
-				buyer.sendMessage("Предмет успешно куплен за §6" + price + EconomyManager.MONEY_FORMAT);
-				buyer.getLevel().addSound(buyer, Sound.RANDOM_LEVELUP, 1, 1, buyer);
-			}
-
-			this.items.remove(id);
-
-			while (page > this.getCountPages()) {
-				page--;
-			}
-
-			this.openAuction(buyer, page);
-		} else {
-			buyer.sendMessage("Недостаточно §6места §fв §6инвентаре§7!");
-			buyer.getLevel().addSound(buyer, Sound.NOTE_BASS, 1, 1, buyer);
-		}
 	}
 
 	private Item setItemRole(Item item, String sellerName, BigDecimal price) {
@@ -280,5 +222,9 @@ public class AuctionManager extends SQLiteDatabase {
 		}
 
 		return countLots >= MAX_LOTS;
+	}
+
+	public boolean removeItem(int id) {
+		return this.items.remove(id) != null;
 	}
 }

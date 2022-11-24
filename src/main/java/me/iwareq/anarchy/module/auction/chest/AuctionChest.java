@@ -16,19 +16,18 @@ public class AuctionChest extends CustomInventory {
 
 		this.manager = manager;
 
-		this.setDefaultListener(((item, inventory, event) -> {
-			manager.buyItem(event.getTransaction().getSource(), item, currentPage, inventory);
+		this.setDefaultItemHandler((item, event) -> {
+			event.setCancelled(true);
 
-			event.setCancelled();
-		}));
+			Player player = event.getTransaction().getSource();
+			player.getLevel().addSound(player, Sound.NOTE_BASS, 1, 1, player);
+		});
 
 		Item storageItem = Item.get(Item.MINECART_WITH_CHEST);
 		storageItem.setCustomName("§r§6Хранилище");
 		storageItem.setLore("", "§r§6• §rНажмите§7, §fчтобы перейти§7!");
 
-		this.setItem(48, storageItem, (item, inventory, event) -> {
-			event.setCancelled();
-		});
+		this.setItem(48, storageItem);
 
 		Item aboutItem = Item.get(Item.SIGN);
 		aboutItem.setCustomName("§r§6Справка");
@@ -47,9 +46,7 @@ public class AuctionChest extends CustomInventory {
 				"§r§6/auc §7(§6цена§7)"
 		);
 
-		this.setItem(50, aboutItem, (item, inventory, event) -> {
-			event.setCancelled();
-		});
+		this.setItem(50, aboutItem);
 
 		int countPages = this.manager.getCountPages();
 		if (countPages != 1) {
@@ -57,7 +54,7 @@ public class AuctionChest extends CustomInventory {
 			backPageItem.setCustomName("§r§6Листнуть назад");
 			backPageItem.setLore("", "§r§6• §rНажмите§7, §fчтобы перейти§7!");
 
-			this.setItem(45, backPageItem, (item, inventory, event) -> {
+			this.setItem(45, backPageItem, (item, event) -> {
 				Player player = event.getTransaction().getSource();
 				if (currentPage == 1) {
 					this.manager.openAuction(player, countPages);
@@ -73,7 +70,7 @@ public class AuctionChest extends CustomInventory {
 			nextPageItem.setCustomName("§r§6Листнуть вперед");
 			nextPageItem.setLore("", "§r§6• §rНажмите§7, §fчтобы перейти§7!");
 
-			this.setItem(53, nextPageItem, (item, inventory, event) -> {
+			this.setItem(53, nextPageItem, (item, event) -> {
 				Player player = event.getTransaction().getSource();
 				if (currentPage == countPages) {
 					this.manager.openAuction(player, 1);
