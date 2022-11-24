@@ -1,6 +1,5 @@
 package me.iwareq.anarchy.command;
 
-import cn.nukkit.Server;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 
@@ -12,7 +11,6 @@ public class TestCommand extends Command {
 
 	@Override
 	public boolean execute(CommandSender commandSender, String s, String[] strings) {
-
 		return false;
 	}
 }
