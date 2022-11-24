@@ -6,7 +6,7 @@
 
 	<groupId>me.iwareq.anarchy</groupId>
 	<artifactId>AnarchyCore</artifactId>
-	<version>2.0</version>
+	<version>2.0.0</version>
 
 	<properties>
 		<maven.compiler.source>8</maven.compiler.source>
