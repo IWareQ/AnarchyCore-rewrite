@@ -5,6 +5,7 @@ import cn.nukkit.Server;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.scheduler.Task;
 import me.iwareq.anarchy.AnarchyCore;
+import me.iwareq.anarchy.util.CompletableFutureArray;
 
 public class ClearLagTask extends Task {
 
@@ -33,7 +34,8 @@ public class ClearLagTask extends Task {
 	}
 
 	private void clearAll() {
-		Server.getInstance().getLevels().values().forEach(level -> {
+		CompletableFutureArray futureArray = new CompletableFutureArray();
+		Server.getInstance().getLevels().values().forEach(level -> futureArray.add(() -> {
 			for (Entity entity : level.getEntities()) {
 				if (!(entity instanceof Player)) {
 					entity.close();
@@ -41,8 +43,8 @@ public class ClearLagTask extends Task {
 			}
 
 			level.doChunkGarbageCollection();
-		});
+		}));
 
-		System.gc();
+		futureArray.execute();
 	}
 }
